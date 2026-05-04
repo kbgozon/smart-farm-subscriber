@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Farm — Custom Subscriber</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
+  <style>
+    :root {
+      --bg:         #0a0e0a;
+      --bg-card:    #111611;
+      --bg-panel:   #161d16;
+      --border:     #1e2a1e;
+      --green:      #22c55e;
+      --green-dim:  #166534;
+      --green-glow: #22c55e44;
+      --amber:      #f59e0b;
+      --amber-glow: #f59e0b33;
+      --red:        #ef4444;
+      --blue:       #3b82f6;
+      --purple:     #a855f7;
+      --text:       #e2e8e2;
+      --muted:      #4a5e4a;
+      --hint:       #2d3d2d;
+      --mono:       'Space Mono', monospace;
+      --sans:       'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(34,197,94,0.05) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #loginScreen {
+      position: fixed; inset: 0;
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    #loginScreen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.97);
+    }
+
+    .login-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .login-logo {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .login-icon {
+      width: 44px; height: 44px;
+      border: 1px solid var(--green-dim); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; background: rgba(34,197,94,0.08);
+      box-shadow: 0 0 16px var(--green-glow);
+    }
+
+    .login-title { font-size: 18px; font-weight: 800; color: var(--text); }
+    .login-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
+
+    .login-label {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px; margin-top: 16px;
+      display: block;
+    }
+
+    .login-input {
+      width: 100%;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .login-input:focus {
+      border-color: var(--green-dim);
+      box-shadow: 0 0 0 3px var(--green-glow);
+    }
+
+    .login-input::placeholder { color: var(--muted); }
+
+    .login-btn {
+      width: 100%; margin-top: 24px;
+      padding: 14px;
+      background: var(--green);
+      color: #0a0e0a;
+      border: none; border-radius: 8px;
+      font-family: var(--sans); font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .login-btn:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 4px 16px var(--green-glow); }
+    .login-btn:active { transform: translateY(0); }
+    .login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .login-error {
+      font-family: var(--mono); font-size: 11px; color: var(--red);
+      margin-top: 12px; text-align: center; display: none;
+    }
+
+    .login-note {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      text-align: center; margin-top: 16px; line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,14,10,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border: 1px solid var(--green-dim); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; background: rgba(34,197,94,0.08);
+      box-shadow: 0 0 12px var(--green-glow);
+    }
+    .logo-text { font-size: 15px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); }
+    .logo-sub  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .online-count {
+      font-family: var(--mono); font-size: 11px;
+      padding: 6px 14px; border-radius: 4px;
+      border: 1px solid var(--green-dim);
+      background: rgba(34,197,94,0.08); color: var(--green);
+    }
+
+    .status-badge {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px;
+      padding: 6px 14px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--bg-panel);
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .status-badge:hover { border-color: var(--red); }
+    .status-badge title { display: none; }
+
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
+    .status-dot.connected { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    .status-dot.error     { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── MAIN ── */
+    main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 36px 24px; }
+
+    .page-title { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .page-heading { font-size: 34px; font-weight: 800; line-height: 1.1; margin-bottom: 28px; }
+    .page-heading span { color: var(--green); }
+
+    .section-label {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── NODE GRID ── */
+    .nodes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+
+    .node-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      transition: border-color 0.3s, transform 0.2s;
+      position: relative;
+    }
+    .node-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .node-card.active { border-color: var(--green-dim); transform: translateY(-1px); }
+    .node-card.active::before { opacity: 1; }
+    .node-card[data-node="NODE_001"]::before { background: var(--green); }
+    .node-card[data-node="NODE_002"]::before { background: var(--blue); }
+    .node-card[data-node="NODE_003"]::before { background: var(--amber); }
+    .node-card[data-node="NODE_004"]::before { background: var(--purple); }
+
+    .node-head {
+      padding: 14px 16px 10px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .node-id  { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 3px; }
+    .node-loc { font-size: 13px; font-weight: 700; color: var(--text); }
+
+    .node-pill {
+      font-family: var(--mono); font-size: 9px; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px;
+      display: flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .node-pill.online  { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid var(--green-dim); }
+    .node-pill.offline { background: var(--bg-panel);     color: var(--muted); border: 1px solid var(--border); }
+    .pill-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .pill-dot.online  { background: var(--green); animation: pulse 1.5s infinite; }
+    .pill-dot.offline { background: var(--muted); }
+
+    .node-body { padding: 16px; }
+
+    .temp-big {
+      font-family: var(--mono); font-size: 42px; font-weight: 700;
+      line-height: 1; letter-spacing: -1px;
+      color: var(--green); text-shadow: 0 0 20px var(--green-glow);
+      transition: all 0.5s; margin-bottom: 8px;
+    }
+    .temp-big .unit { font-size: 18px; color: var(--muted); font-weight: 400; }
+    .temp-big.hot    { color: var(--amber); text-shadow: 0 0 20px var(--amber-glow); }
+    .temp-big.waiting{ color: var(--muted); text-shadow: none; }
+
+    .node-updated { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-bottom: 10px; }
+
+    .temp-bar-wrap { margin-bottom: 10px; }
+    .temp-bar { height: 3px; background: var(--hint); border-radius: 2px; overflow: hidden; }
+    .temp-bar-fill { height: 100%; width: 0%; border-radius: 2px; background: var(--green); transition: width 0.8s ease, background 0.3s; }
+    .temp-bar-fill.hot      { background: var(--amber); }
+    .temp-bar-fill.critical { background: var(--red); }
+
+    .buzzer-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 12px; background: var(--bg-panel);
+      border-radius: 6px; border: 1px solid var(--hint);
+    }
+    .buzzer-label-sm {
+      font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .bz-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
+    .bz-dot.on { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 0.5s infinite; }
+    .buzzer-state-sm { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--muted); transition: color 0.3s; }
+    .buzzer-state-sm.on { color: var(--amber); }
+
+    /* ── BUZZER PANEL ── */
+    .buzzer-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+    .buzzer-panel-head {
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .buzzer-panel-title { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .buzzer-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .buzzer-node { padding: 20px; border-right: 1px solid var(--border); }
+    .buzzer-node:last-child { border-right: none; }
+    .bz-node-id  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+    .bz-node-loc { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+    .bz-state { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .bz-big-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
+    .bz-big-dot.on { background: var(--amber); box-shadow: 0 0 8px var(--amber); animation: pulse 0.5s infinite; }
+    .bz-val { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--muted); transition: color 0.3s; }
+    .bz-val.on { color: var(--amber); }
+
+    /* ── FEED LOG ── */
+    .feed-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+    .feed-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); }
+    .feed-title { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .feed-count { font-family: var(--mono); font-size: 10px; color: var(--hint); background: var(--bg-panel); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); }
+    .feed-list { max-height: 240px; overflow-y: auto; }
+    .feed-list::-webkit-scrollbar { width: 3px; }
+    .feed-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .feed-item {
+      display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 16px;
+      padding: 10px 24px; border-bottom: 1px solid var(--hint);
+      font-family: var(--mono); font-size: 11px; animation: slideIn 0.2s ease;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+    .feed-topic        { color: var(--green); }
+    .feed-topic.buzzer { color: var(--amber); }
+    .feed-val  { color: var(--text); font-weight: 700; }
+    .feed-time { color: var(--muted); font-size: 10px; }
+    .feed-empty { padding: 28px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--hint); letter-spacing: 1px; }
+
+    /* ── CONFIG ── */
+    .config-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .config-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .config-row  { display: flex; flex-direction: column; gap: 3px; }
+    .config-key  { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .config-val  { font-family: var(--mono); font-size: 11px; color: var(--green); }
+
+    footer {
+      position: relative; z-index: 1; text-align: center; padding: 20px;
+      font-family: var(--mono); font-size: 10px; color: var(--hint);
+      border-top: 1px solid var(--border); letter-spacing: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .nodes-grid  { grid-template-columns: repeat(2, 1fr); }
+      .buzzer-grid { grid-template-columns: repeat(2, 1fr); }
+      .config-grid { grid-template-columns: repeat(2, 1fr); }
+      .buzzer-node { border-bottom: 1px solid var(--border); }
+      header { padding: 14px 16px; }
+      main   { padding: 24px 16px; }
+      .page-heading { font-size: 26px; }
+      .login-box { margin: 16px; padding: 28px; }
+    }
+    @media (max-width: 480px) {
+      .nodes-grid  { grid-template-columns: 1fr; }
+      .buzzer-grid { grid-template-columns: 1fr; }
+      .config-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-icon">🌾</div>
+      <div>
+        <div class="login-title">SmartFarm</div>
+        <div class="login-sub">CUSTOM SUBSCRIBER · ADAFRUIT IO</div>
+      </div>
+    </div>
+
+    <label class="login-label" for="inputUser">Adafruit IO Username</label>
+    <input class="login-input" id="inputUser" type="text" placeholder="your_aio_username" autocomplete="off" spellcheck="false"/>
+
+    <label class="login-label" for="inputKey">Adafruit IO Key</label>
+    <input class="login-input" id="inputKey" type="password" placeholder="aio_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
+
+    <button class="login-btn" id="connectBtn" onclick="startConnection()">🔌 Connect to Broker</button>
+
+    <div class="login-error" id="loginError">⚠ Please enter both username and AIO key.</div>
+
+    <div class="login-note">
+      Your credentials are used only in your browser.<br/>
+      They are never stored or sent anywhere else.
+    </div>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🌾</div>
+    <div>
+      <div class="logo-text">SmartFarm</div>
+      <div class="logo-sub">CUSTOM SUBSCRIBER · GITHUB PAGES</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="online-count" id="onlineCount">0 / 4 online</div>
+    <div class="status-badge" onclick="logout()" title="Click to disconnect">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-title">// MQTT · Adafruit IO Broker · WebSocket</div>
+  <div class="page-heading">Farm <span>Network</span> Monitor</div>
+
+  <!-- Node Cards -->
+  <div class="section-label">Sensor Nodes</div>
+  <div class="nodes-grid">
+
+    <div class="node-card" id="card-NODE_001" data-node="NODE_001">
+      <div class="node-head">
+        <div><div class="node-id">NODE_001</div><div class="node-loc">📍 West Field</div></div>
+        <div class="node-pill offline" id="pill-NODE_001">
+          <div class="pill-dot offline" id="pilldot-NODE_001"></div>
+          <span id="pilltext-NODE_001">Waiting</span>
+        </div>
+      </div>
+      <div class="node-body">
+        <div class="temp-big waiting" id="temp-NODE_001">--<span class="unit">°C</span></div>
+        <div class="node-updated" id="upd-NODE_001">no data yet</div>
+        <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_001"></div></div></div>
+        <div class="buzzer-row">
+          <div class="buzzer-label-sm"><div class="bz-dot" id="bzdot-NODE_001"></div>BUZZER</div>
+          <div class="buzzer-state-sm" id="bzstate-NODE_001">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node-card" id="card-NODE_002" data-node="NODE_002">
+      <div class="node-head">
+        <div><div class="node-id">NODE_002</div><div class="node-loc">📍 North Field</div></div>
+        <div class="node-pill offline" id="pill-NODE_002">
+          <div class="pill-dot offline" id="pilldot-NODE_002"></div>
+          <span id="pilltext-NODE_002">Waiting</span>
+        </div>
+      </div>
+      <div class="node-body">
+        <div class="temp-big waiting" id="temp-NODE_002">--<span class="unit">°C</span></div>
+        <div class="node-updated" id="upd-NODE_002">no data yet</div>
+        <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_002"></div></div></div>
+        <div class="buzzer-row">
+          <div class="buzzer-label-sm"><div class="bz-dot" id="bzdot-NODE_002"></div>BUZZER</div>
+          <div class="buzzer-state-sm" id="bzstate-NODE_002">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node-card" id="card-NODE_003" data-node="NODE_003">
+      <div class="node-head">
+        <div><div class="node-id">NODE_003</div><div class="node-loc">📍 Green Field</div></div>
+        <div class="node-pill offline" id="pill-NODE_003">
+          <div class="pill-dot offline" id="pilldot-NODE_003"></div>
+          <span id="pilltext-NODE_003">Waiting</span>
+        </div>
+      </div>
+      <div class="node-body">
+        <div class="temp-big waiting" id="temp-NODE_003">--<span class="unit">°C</span></div>
+        <div class="node-updated" id="upd-NODE_003">no data yet</div>
+        <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_003"></div></div></div>
+        <div class="buzzer-row">
+          <div class="buzzer-label-sm"><div class="bz-dot" id="bzdot-NODE_003"></div>BUZZER</div>
+          <div class="buzzer-state-sm" id="bzstate-NODE_003">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node-card" id="card-NODE_004" data-node="NODE_004">
+      <div class="node-head">
+        <div><div class="node-id">NODE_004</div><div class="node-loc">📍 South Field</div></div>
+        <div class="node-pill offline" id="pill-NODE_004">
+          <div class="pill-dot offline" id="pilldot-NODE_004"></div>
+          <span id="pilltext-NODE_004">Waiting</span>
+        </div>
+      </div>
+      <div class="node-body">
+        <div class="temp-big waiting" id="temp-NODE_004">--<span class="unit">°C</span></div>
+        <div class="node-updated" id="upd-NODE_004">no data yet</div>
+        <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_004"></div></div></div>
+        <div class="buzzer-row">
+          <div class="buzzer-label-sm"><div class="bz-dot" id="bzdot-NODE_004"></div>BUZZER</div>
+          <div class="buzzer-state-sm" id="bzstate-NODE_004">--</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Buzzer Panel -->
+  <div class="section-label">Buzzer Status</div>
+  <div class="buzzer-panel">
+    <div class="buzzer-panel-head">
+      <div class="buzzer-panel-title">// farm-buzzer · shared feed</div>
+      <div class="feed-count" id="buzzerFeedLabel">—</div>
+    </div>
+    <div class="buzzer-grid">
+      <div class="buzzer-node">
+        <div class="bz-node-id">NODE_001</div><div class="bz-node-loc">West Field</div>
+        <div class="bz-state"><div class="bz-big-dot" id="bzpanel-dot-NODE_001"></div>Buzzer</div>
+        <div class="bz-val" id="bzpanel-val-NODE_001">--</div>
+      </div>
+      <div class="buzzer-node">
+        <div class="bz-node-id">NODE_002</div><div class="bz-node-loc">North Field</div>
+        <div class="bz-state"><div class="bz-big-dot" id="bzpanel-dot-NODE_002"></div>Buzzer</div>
+        <div class="bz-val" id="bzpanel-val-NODE_002">--</div>
+      </div>
+      <div class="buzzer-node">
+        <div class="bz-node-id">NODE_003</div><div class="bz-node-loc">Green Field</div>
+        <div class="bz-state"><div class="bz-big-dot" id="bzpanel-dot-NODE_003"></div>Buzzer</div>
+        <div class="bz-val" id="bzpanel-val-NODE_003">--</div>
+      </div>
+      <div class="buzzer-node">
+        <div class="bz-node-id">NODE_004</div><div class="bz-node-loc">South Field</div>
+        <div class="bz-state"><div class="bz-big-dot" id="bzpanel-dot-NODE_004"></div>Buzzer</div>
+        <div class="bz-val" id="bzpanel-val-NODE_004">--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MQTT Feed Log -->
+  <div class="section-label">MQTT Live Feed</div>
+  <div class="feed-card">
+    <div class="feed-header">
+      <div class="feed-title">// Incoming Messages</div>
+      <div class="feed-count" id="feedCount">0 messages</div>
+    </div>
+    <div class="feed-list" id="feedList">
+      <div class="feed-empty">— awaiting MQTT messages —</div>
+    </div>
+  </div>
+
+  <!-- Config -->
+  <div class="section-label">Connection Info</div>
+  <div class="config-card">
+    <div class="config-grid">
+      <div class="config-row">
+        <span class="config-key">Broker</span>
+        <span class="config-val">io.adafruit.com</span>
+      </div>
+      <div class="config-row">
+        <span class="config-key">Protocol</span>
+        <span class="config-val">MQTT over WSS :443</span>
+      </div>
+      <div class="config-row">
+        <span class="config-key">Username</span>
+        <span class="config-val" id="configUser">—</span>
+      </div>
+      <div class="config-row">
+        <span class="config-key">Temp Feeds</span>
+        <span class="config-val">farm-temperature-node001~004</span>
+      </div>
+      <div class="config-row">
+        <span class="config-key">Buzzer Feed</span>
+        <span class="config-val">farm-buzzer (shared)</span>
+      </div>
+      <div class="config-row">
+        <span class="config-key">Threshold</span>
+        <span class="config-val">35.0 °C</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  CUSTOM SUBSCRIBER · DEPLOYED ON GITHUB PAGES · ADAFRUIT IO MQTT BROKER
+</footer>
+
+<script>
+  const BROKER_URL     = 'wss://io.adafruit.com:443/mqtt';
+  const TEMP_THRESHOLD = 35.0;
+
+  let mqttClient       = null;
+  let feedItems        = [];
+  let msgCount         = 0;
+  let nodeTimestamps   = {};
+
+  // ── Allow Enter key to connect ───────────────────────
+  document.getElementById('inputKey').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startConnection();
+  });
+  document.getElementById('inputUser').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('inputKey').focus();
+  });
+
+  function nowStr() {
+    return new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  function setStatus(state, text) {
+    document.getElementById('statusDot').className    = 'status-dot ' + state;
+    document.getElementById('statusText').textContent = text;
+  }
+
+  function updateOnlineCount() {
+    const now    = Date.now();
+    const online = ['NODE_001','NODE_002','NODE_003','NODE_004']
+      .filter(id => nodeTimestamps[id] && (now - nodeTimestamps[id]) < 30000).length;
+    document.getElementById('onlineCount').textContent = `${online} / 4 online`;
+  }
+
+  function updateTempUI(nodeId, val) {
+    const num   = parseFloat(val);
+    const isHot = num >= TEMP_THRESHOLD;
+
+    const tempEl = document.getElementById(`temp-${nodeId}`);
+    tempEl.innerHTML = `${num.toFixed(1)}<span class="unit">°C</span>`;
+    tempEl.className = 'temp-big' + (isHot ? ' hot' : '');
+
+    const pct  = Math.min(100, Math.max(0, (num / 50) * 100));
+    const fill = document.getElementById(`bar-${nodeId}`);
+    fill.style.width = pct + '%';
+    fill.className   = 'temp-bar-fill' + (num >= 40 ? ' critical' : isHot ? ' hot' : '');
+
+    document.getElementById(`upd-${nodeId}`).textContent      = `updated: ${nowStr()}`;
+    document.getElementById(`pill-${nodeId}`).className       = 'node-pill online';
+    document.getElementById(`pilldot-${nodeId}`).className    = 'pill-dot online';
+    document.getElementById(`pilltext-${nodeId}`).textContent = 'Online';
+    document.getElementById(`card-${nodeId}`).classList.add('active');
+
+    nodeTimestamps[nodeId] = Date.now();
+    updateOnlineCount();
+  }
+
+  function updateBuzzerUI(nodeId, val) {
+    const isOn = val.trim().toUpperCase() === 'ON' || val.trim() === '1';
+
+    const dot   = document.getElementById(`bzdot-${nodeId}`);
+    const state = document.getElementById(`bzstate-${nodeId}`);
+    if (dot)   dot.className       = 'bz-dot' + (isOn ? ' on' : '');
+    if (state) { state.textContent = val.toUpperCase(); state.className = 'buzzer-state-sm' + (isOn ? ' on' : ''); }
+
+    const pdot = document.getElementById(`bzpanel-dot-${nodeId}`);
+    const pval = document.getElementById(`bzpanel-val-${nodeId}`);
+    if (pdot) pdot.className   = 'bz-big-dot' + (isOn ? ' on' : '');
+    if (pval) { pval.textContent = val.toUpperCase(); pval.className = 'bz-val' + (isOn ? ' on' : ''); }
+  }
+
+  function addFeedItem(topic, value) {
+    msgCount++;
+    const isBuzzer = topic.includes('buzzer');
+    feedItems.unshift({ topic, value, time: nowStr(), isBuzzer });
+    if (feedItems.length > 40) feedItems.pop();
+
+    document.getElementById('feedCount').textContent = `${msgCount} messages`;
+    document.getElementById('feedList').innerHTML = feedItems.map(item => `
+      <div class="feed-item">
+        <span class="feed-topic ${item.isBuzzer ? 'buzzer' : ''}">${item.topic}</span>
+        <span class="feed-val">${item.value}</span>
+        <span class="feed-time">${item.time}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── Start connection from login form ─────────────────
+  function startConnection() {
+    const username = document.getElementById('inputUser').value.trim();
+    const key      = document.getElementById('inputKey').value.trim();
+    const errEl    = document.getElementById('loginError');
+
+    if (!username || !key) {
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    document.getElementById('connectBtn').disabled    = true;
+    document.getElementById('connectBtn').textContent = '⏳ Connecting...';
+
+    connect(username, key);
+  }
+
+  function connect(AIO_USERNAME, AIO_KEY) {
+    const NODES = [
+      { id: 'NODE_001', feed: `${AIO_USERNAME}/feeds/farm-temperature-node001` },
+      { id: 'NODE_002', feed: `${AIO_USERNAME}/feeds/farm-temperature-node002` },
+      { id: 'NODE_003', feed: `${AIO_USERNAME}/feeds/farm-temperature-node003` },
+      { id: 'NODE_004', feed: `${AIO_USERNAME}/feeds/farm-temperature-node004` },
+    ];
+    const BUZZER_FEED = `${AIO_USERNAME}/feeds/farm-buzzer`;
+
+    document.getElementById('configUser').textContent      = AIO_USERNAME;
+    document.getElementById('buzzerFeedLabel').textContent = `${AIO_USERNAME}/feeds/farm-buzzer`;
+
+    setStatus('', 'Connecting...');
+
+    const client = mqtt.connect(BROKER_URL, {
+      username:        AIO_USERNAME,
+      password:        AIO_KEY,
+      clientId:        'custom-sub-' + Math.random().toString(16).substr(2, 8),
+      reconnectPeriod: 5000,
+    });
+
+    mqttClient = client;
+
+    client.on('connect', () => {
+      // Hide login screen
+      document.getElementById('loginScreen').classList.add('hidden');
+      setStatus('connected', `Connected · ${AIO_USERNAME}`);
+
+      NODES.forEach(n => client.subscribe(n.feed, { qos: 1 }));
+      client.subscribe(BUZZER_FEED, { qos: 1 });
+    });
+
+    client.on('message', (topic, message) => {
+      const val      = message.toString();
+      addFeedItem(topic, val);
+
+      const tempNode = NODES.find(n => n.feed === topic);
+      if (tempNode) { updateTempUI(tempNode.id, val); return; }
+
+      if (topic === BUZZER_FEED) {
+        try {
+          const obj = JSON.parse(val);
+          if (obj.node && obj.cmd) { updateBuzzerUI(obj.node, obj.cmd); return; }
+        } catch(e) {}
+        NODES.forEach(n => updateBuzzerUI(n.id, val));
+      }
+    });
+
+    client.on('error', () => {
+      setStatus('error', 'Connection Error');
+      document.getElementById('connectBtn').disabled    = false;
+      document.getElementById('connectBtn').textContent = '🔌 Connect to Broker';
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginError').textContent   = '⚠ Connection failed. Check your credentials.';
+      document.getElementById('loginScreen').classList.remove('hidden');
+    });
+
+    client.on('offline', () => setStatus('', 'Reconnecting...'));
+    client.on('close',   () => setStatus('', 'Disconnected'));
+  }
+
+  function logout() {
+    if (mqttClient) { mqttClient.end(true); mqttClient = null; }
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('connectBtn').disabled    = false;
+    document.getElementById('connectBtn').textContent = '🔌 Connect to Broker';
+    document.getElementById('inputKey').value = '';
+    setStatus('', 'Disconnected');
+  }
+
+  setInterval(updateOnlineCount, 15000);
+</script>
+</body>
+</html>
