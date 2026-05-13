@@ -18,6 +18,7 @@
       --amber:      #f59e0b;
       --amber-glow: #f59e0b33;
       --red:        #ef4444;
+      --red-glow:   #ef444433;
       --blue:       #3b82f6;
       --purple:     #a855f7;
       --text:       #e2e8e2;
@@ -28,262 +29,145 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
     body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none; z-index: 0;
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
     }
 
-    body::after {
-      content: '';
-      position: fixed; top: -200px; left: 50%;
-      transform: translateX(-50%);
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(34,197,94,0.05) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
-
-    /* ── LOGIN SCREEN ── */
+    /* ── LOGIN ── */
     #loginScreen {
-      position: fixed; inset: 0;
-      z-index: 1000;
+      position: fixed; inset: 0; z-index: 1000;
       display: flex; align-items: center; justify-content: center;
-      background: var(--bg);
-      transition: opacity 0.4s, transform 0.4s;
+      background: var(--bg); transition: opacity 0.4s, transform 0.4s;
     }
-
-    #loginScreen.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(0.97);
-    }
+    #loginScreen.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
 
     .login-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px;
-      width: 100%;
-      max-width: 420px;
-      position: relative;
-      z-index: 1;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; position: relative; z-index: 1;
     }
-
     .login-box::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--green), transparent);
-      border-radius: 16px 16px 0 0;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent); border-radius: 16px 16px 0 0;
     }
-
-    .login-logo {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .login-icon {
-      width: 44px; height: 44px;
-      border: 1px solid var(--green-dim); border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; background: rgba(34,197,94,0.08);
-      box-shadow: 0 0 16px var(--green-glow);
-    }
-
-    .login-title { font-size: 18px; font-weight: 800; color: var(--text); }
+    .login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .login-icon { width: 44px; height: 44px; border: 1px solid var(--green-dim); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(34,197,94,0.08); box-shadow: 0 0 16px var(--green-glow); }
+    .login-title { font-size: 18px; font-weight: 800; }
     .login-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
-
-    .login-label {
-      font-family: var(--mono); font-size: 10px;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 6px; margin-top: 16px;
-      display: block;
-    }
-
-    .login-input {
-      width: 100%;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-family: var(--mono); font-size: 13px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .login-input:focus {
-      border-color: var(--green-dim);
-      box-shadow: 0 0 0 3px var(--green-glow);
-    }
-
+    .login-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; margin-top: 16px; display: block; }
+    .login-input { width: 100%; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: var(--mono); font-size: 13px; color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .login-input:focus { border-color: var(--green-dim); box-shadow: 0 0 0 3px var(--green-glow); }
     .login-input::placeholder { color: var(--muted); }
-
-    .login-btn {
-      width: 100%; margin-top: 24px;
-      padding: 14px;
-      background: var(--green);
-      color: #0a0e0a;
-      border: none; border-radius: 8px;
-      font-family: var(--sans); font-size: 14px; font-weight: 700;
-      cursor: pointer; letter-spacing: 1px;
-      transition: all 0.2s;
-    }
-
+    .login-btn { width: 100%; margin-top: 24px; padding: 14px; background: var(--green); color: #0a0e0a; border: none; border-radius: 8px; font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; }
     .login-btn:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 4px 16px var(--green-glow); }
-    .login-btn:active { transform: translateY(0); }
     .login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .login-error {
-      font-family: var(--mono); font-size: 11px; color: var(--red);
-      margin-top: 12px; text-align: center; display: none;
-    }
-
-    .login-note {
-      font-family: var(--mono); font-size: 10px; color: var(--muted);
-      text-align: center; margin-top: 16px; line-height: 1.6;
-    }
+    .login-error { font-family: var(--mono); font-size: 11px; color: var(--red); margin-top: 12px; text-align: center; display: none; }
+    .login-note  { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.6; }
 
     /* ── HEADER ── */
-    header {
-      position: relative; z-index: 10;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 32px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(10,14,10,0.85);
-      backdrop-filter: blur(12px);
-    }
-
+    header { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; border-bottom: 1px solid var(--border); background: rgba(10,14,10,0.85); backdrop-filter: blur(12px); }
     .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-icon {
-      width: 38px; height: 38px;
-      border: 1px solid var(--green-dim); border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; background: rgba(34,197,94,0.08);
-      box-shadow: 0 0 12px var(--green-glow);
-    }
+    .logo-icon { width: 38px; height: 38px; border: 1px solid var(--green-dim); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(34,197,94,0.08); box-shadow: 0 0 12px var(--green-glow); }
     .logo-text { font-size: 15px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); }
     .logo-sub  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
-
     .header-right { display: flex; align-items: center; gap: 12px; }
-
-    .online-count {
-      font-family: var(--mono); font-size: 11px;
-      padding: 6px 14px; border-radius: 4px;
-      border: 1px solid var(--green-dim);
-      background: rgba(34,197,94,0.08); color: var(--green);
-    }
-
-    .status-badge {
-      display: flex; align-items: center; gap: 8px;
-      font-family: var(--mono); font-size: 11px;
-      padding: 6px 14px; border-radius: 4px;
-      border: 1px solid var(--border); background: var(--bg-panel);
-      cursor: pointer; transition: border-color 0.2s;
-    }
+    .online-count { font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 4px; border: 1px solid var(--green-dim); background: rgba(34,197,94,0.08); color: var(--green); }
+    .status-badge { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-panel); cursor: pointer; transition: border-color 0.2s; }
     .status-badge:hover { border-color: var(--red); }
-    .status-badge title { display: none; }
-
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
     .status-dot.connected { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
-    .status-dot.error     { background: var(--red);   box-shadow: 0 0 8px var(--red); }
-
+    .status-dot.error     { background: var(--red); box-shadow: 0 0 8px var(--red); }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
     /* ── MAIN ── */
-    main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 36px 24px; }
-
-    .page-title { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 36px 24px; }
+    .page-title   { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
     .page-heading { font-size: 34px; font-weight: 800; line-height: 1.1; margin-bottom: 28px; }
     .page-heading span { color: var(--green); }
 
-    .section-label {
-      font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 14px;
-      display: flex; align-items: center; gap: 12px;
-    }
+    .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
     .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── ANALYTICS SUMMARY ROW ── */
+    .analytics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    .analytics-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: border-color 0.3s; }
+    .analytics-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .analytics-card.green::before  { background: var(--green); }
+    .analytics-card.amber::before  { background: var(--amber); }
+    .analytics-card.blue::before   { background: var(--blue); }
+    .analytics-card.red::before    { background: var(--red); }
+    .analytics-card:hover { border-color: var(--green-dim); }
+    .an-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .an-value { font-family: var(--mono); font-size: 32px; font-weight: 700; color: var(--green); line-height: 1; margin-bottom: 4px; }
+    .an-value.amber  { color: var(--amber); }
+    .an-value.blue   { color: var(--blue); }
+    .an-value.red    { color: var(--red); }
+    .an-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+    /* ── ANALYTICS DETAIL ── */
+    .analytics-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+
+    .analytics-table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .an-table-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .an-table-title { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .an-table-badge { font-family: var(--mono); font-size: 9px; padding: 3px 8px; border-radius: 4px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--muted); }
+
+    .an-table { width: 100%; border-collapse: collapse; }
+    .an-table th { padding: 10px 20px; text-align: left; font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg-panel); }
+    .an-table td { padding: 12px 20px; font-family: var(--mono); font-size: 11px; border-bottom: 1px solid var(--hint); color: var(--text); }
+    .an-table tr:last-child td { border-bottom: none; }
+    .an-table tr:hover td { background: var(--bg-panel); }
+
+    .trend-up   { color: var(--red);   }
+    .trend-down { color: var(--green); }
+    .trend-flat { color: var(--muted); }
+
+    .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; font-family: var(--mono); font-size: 10px; font-weight: 700; }
+    .rank-1 { background: rgba(245,158,11,0.2); color: var(--amber); }
+    .rank-2 { background: rgba(148,163,184,0.1); color: #94a3b8; }
+    .rank-3 { background: rgba(180,120,60,0.1);  color: #b47c3c; }
+    .rank-4 { background: var(--hint); color: var(--muted); }
+
+    .alert-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .alert-bar { flex: 1; height: 4px; background: var(--hint); border-radius: 2px; overflow: hidden; }
+    .alert-bar-fill { height: 100%; background: var(--amber); border-radius: 2px; transition: width 0.8s ease; }
 
     /* ── NODE GRID ── */
     .nodes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-
-    .node-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; overflow: hidden;
-      transition: border-color 0.3s, transform 0.2s;
-      position: relative;
-    }
-    .node-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      opacity: 0; transition: opacity 0.3s;
-    }
+    .node-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.3s, transform 0.2s; position: relative; }
+    .node-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0; transition: opacity 0.3s; }
     .node-card.active { border-color: var(--green-dim); transform: translateY(-1px); }
     .node-card.active::before { opacity: 1; }
     .node-card[data-node="NODE_001"]::before { background: var(--green); }
     .node-card[data-node="NODE_002"]::before { background: var(--blue); }
     .node-card[data-node="NODE_003"]::before { background: var(--amber); }
     .node-card[data-node="NODE_004"]::before { background: var(--purple); }
-
-    .node-head {
-      padding: 14px 16px 10px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: flex-start; justify-content: space-between;
-    }
+    .node-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
     .node-id  { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 3px; }
-    .node-loc { font-size: 13px; font-weight: 700; color: var(--text); }
-
-    .node-pill {
-      font-family: var(--mono); font-size: 9px; font-weight: 700;
-      padding: 3px 8px; border-radius: 4px;
-      display: flex; align-items: center; gap: 4px; white-space: nowrap;
-    }
+    .node-loc { font-size: 13px; font-weight: 700; }
+    .node-pill { font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
     .node-pill.online  { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid var(--green-dim); }
-    .node-pill.offline { background: var(--bg-panel);     color: var(--muted); border: 1px solid var(--border); }
+    .node-pill.offline { background: var(--bg-panel); color: var(--muted); border: 1px solid var(--border); }
     .pill-dot { width: 5px; height: 5px; border-radius: 50%; }
     .pill-dot.online  { background: var(--green); animation: pulse 1.5s infinite; }
     .pill-dot.offline { background: var(--muted); }
-
     .node-body { padding: 16px; }
-
-    .temp-big {
-      font-family: var(--mono); font-size: 42px; font-weight: 700;
-      line-height: 1; letter-spacing: -1px;
-      color: var(--green); text-shadow: 0 0 20px var(--green-glow);
-      transition: all 0.5s; margin-bottom: 8px;
-    }
+    .temp-big { font-family: var(--mono); font-size: 42px; font-weight: 700; line-height: 1; letter-spacing: -1px; color: var(--green); text-shadow: 0 0 20px var(--green-glow); transition: all 0.5s; margin-bottom: 4px; }
     .temp-big .unit { font-size: 18px; color: var(--muted); font-weight: 400; }
     .temp-big.hot    { color: var(--amber); text-shadow: 0 0 20px var(--amber-glow); }
     .temp-big.waiting{ color: var(--muted); text-shadow: none; }
-
+    .temp-avg { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 8px; }
     .node-updated { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-bottom: 10px; }
-
     .temp-bar-wrap { margin-bottom: 10px; }
     .temp-bar { height: 3px; background: var(--hint); border-radius: 2px; overflow: hidden; }
     .temp-bar-fill { height: 100%; width: 0%; border-radius: 2px; background: var(--green); transition: width 0.8s ease, background 0.3s; }
     .temp-bar-fill.hot      { background: var(--amber); }
     .temp-bar-fill.critical { background: var(--red); }
-
-    .buzzer-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 12px; background: var(--bg-panel);
-      border-radius: 6px; border: 1px solid var(--hint);
-    }
-    .buzzer-label-sm {
-      font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
-      text-transform: uppercase; color: var(--muted);
-      display: flex; align-items: center; gap: 6px;
-    }
+    .buzzer-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: var(--bg-panel); border-radius: 6px; border: 1px solid var(--hint); }
+    .buzzer-label-sm { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px; }
     .bz-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
     .bz-dot.on { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 0.5s infinite; }
     .buzzer-state-sm { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--muted); transition: color 0.3s; }
@@ -291,10 +175,7 @@
 
     /* ── BUZZER PANEL ── */
     .buzzer-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
-    .buzzer-panel-head {
-      padding: 14px 24px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    .buzzer-panel-head { padding: 14px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
     .buzzer-panel-title { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
     .buzzer-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
     .buzzer-node { padding: 20px; border-right: 1px solid var(--border); }
@@ -312,14 +193,10 @@
     .feed-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); }
     .feed-title { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
     .feed-count { font-family: var(--mono); font-size: 10px; color: var(--hint); background: var(--bg-panel); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); }
-    .feed-list { max-height: 240px; overflow-y: auto; }
+    .feed-list { max-height: 200px; overflow-y: auto; }
     .feed-list::-webkit-scrollbar { width: 3px; }
     .feed-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-    .feed-item {
-      display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 16px;
-      padding: 10px 24px; border-bottom: 1px solid var(--hint);
-      font-family: var(--mono); font-size: 11px; animation: slideIn 0.2s ease;
-    }
+    .feed-item { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 16px; padding: 10px 24px; border-bottom: 1px solid var(--hint); font-family: var(--mono); font-size: 11px; animation: slideIn 0.2s ease; }
     .feed-item:last-child { border-bottom: none; }
     @keyframes slideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
     .feed-topic        { color: var(--green); }
@@ -335,32 +212,31 @@
     .config-key  { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
     .config-val  { font-family: var(--mono); font-size: 11px; color: var(--green); }
 
-    footer {
-      position: relative; z-index: 1; text-align: center; padding: 20px;
-      font-family: var(--mono); font-size: 10px; color: var(--hint);
-      border-top: 1px solid var(--border); letter-spacing: 1px;
-    }
+    .loading-text { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 20px; text-align: center; }
+
+    footer { position: relative; z-index: 1; text-align: center; padding: 20px; font-family: var(--mono); font-size: 10px; color: var(--hint); border-top: 1px solid var(--border); letter-spacing: 1px; }
 
     @media (max-width: 768px) {
-      .nodes-grid  { grid-template-columns: repeat(2, 1fr); }
-      .buzzer-grid { grid-template-columns: repeat(2, 1fr); }
-      .config-grid { grid-template-columns: repeat(2, 1fr); }
-      .buzzer-node { border-bottom: 1px solid var(--border); }
+      .nodes-grid      { grid-template-columns: repeat(2, 1fr); }
+      .buzzer-grid     { grid-template-columns: repeat(2, 1fr); }
+      .analytics-row   { grid-template-columns: repeat(2, 1fr); }
+      .analytics-detail{ grid-template-columns: 1fr; }
+      .config-grid     { grid-template-columns: repeat(2, 1fr); }
       header { padding: 14px 16px; }
       main   { padding: 24px 16px; }
       .page-heading { font-size: 26px; }
-      .login-box { margin: 16px; padding: 28px; }
     }
     @media (max-width: 480px) {
-      .nodes-grid  { grid-template-columns: 1fr; }
-      .buzzer-grid { grid-template-columns: 1fr; }
-      .config-grid { grid-template-columns: 1fr; }
+      .nodes-grid    { grid-template-columns: 1fr; }
+      .buzzer-grid   { grid-template-columns: 1fr; }
+      .analytics-row { grid-template-columns: 1fr; }
+      .config-grid   { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── LOGIN SCREEN ── -->
+<!-- ── LOGIN ── -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">
@@ -370,21 +246,13 @@
         <div class="login-sub">CUSTOM SUBSCRIBER · ADAFRUIT IO</div>
       </div>
     </div>
-
     <label class="login-label" for="inputUser">Adafruit IO Username</label>
     <input class="login-input" id="inputUser" type="text" placeholder="your_aio_username" autocomplete="off" spellcheck="false"/>
-
     <label class="login-label" for="inputKey">Adafruit IO Key</label>
     <input class="login-input" id="inputKey" type="password" placeholder="aio_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
-
     <button class="login-btn" id="connectBtn" onclick="startConnection()">🔌 Connect to Broker</button>
-
     <div class="login-error" id="loginError">⚠ Please enter both username and AIO key.</div>
-
-    <div class="login-note">
-      Your credentials are used only in your browser.<br/>
-      They are never stored or sent anywhere else.
-    </div>
+    <div class="login-note">Your credentials are used only in your browser.<br/>They are never stored or sent anywhere else.</div>
   </div>
 </div>
 
@@ -399,7 +267,7 @@
   </div>
   <div class="header-right">
     <div class="online-count" id="onlineCount">0 / 4 online</div>
-    <div class="status-badge" onclick="logout()" title="Click to disconnect">
+    <div class="status-badge" onclick="logout()">
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">Connecting...</span>
     </div>
@@ -407,24 +275,94 @@
 </header>
 
 <main>
-
-  <div class="page-title">// MQTT · Adafruit IO Broker · WebSocket</div>
+  <div class="page-title">// MQTT · Adafruit IO · Supabase Analytics</div>
   <div class="page-heading">Farm <span>Network</span> Monitor</div>
 
-  <!-- Node Cards -->
-  <div class="section-label">Sensor Nodes</div>
+  <!-- ── ANALYTICS SUMMARY ── -->
+  <div class="section-label">Analytics — Supabase Data Warehouse</div>
+  <div class="analytics-row">
+    <div class="analytics-card green">
+      <div class="an-label">Total Readings Logged</div>
+      <div class="an-value" id="an-total">--</div>
+      <div class="an-sub">in sensor_logs table</div>
+    </div>
+    <div class="analytics-card amber">
+      <div class="an-label">Total Buzzer Alerts</div>
+      <div class="an-value amber" id="an-alerts">--</div>
+      <div class="an-sub">ON events logged</div>
+    </div>
+    <div class="analytics-card blue">
+      <div class="an-label">Network Avg Temp</div>
+      <div class="an-value blue" id="an-avg">--</div>
+      <div class="an-sub">last 24 hours · all nodes</div>
+    </div>
+    <div class="analytics-card red">
+      <div class="an-label">Hottest Node</div>
+      <div class="an-value red" id="an-hottest">--</div>
+      <div class="an-sub" id="an-hottest-sub">based on 24h average</div>
+    </div>
+  </div>
+
+  <!-- ── ANALYTICS DETAIL ── -->
+  <div class="analytics-detail">
+
+    <!-- Node Rankings -->
+    <div class="analytics-table-card">
+      <div class="an-table-head">
+        <div class="an-table-title">// Node Temperature Rankings</div>
+        <div class="an-table-badge">24h Average</div>
+      </div>
+      <table class="an-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Node</th>
+            <th>Location</th>
+            <th>Avg Temp</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody id="rankingTable">
+          <tr><td colspan="5" class="loading-text">Loading analytics...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Buzzer Alert Count -->
+    <div class="analytics-table-card">
+      <div class="an-table-head">
+        <div class="an-table-title">// Buzzer Alert Frequency</div>
+        <div class="an-table-badge">All Time</div>
+      </div>
+      <table class="an-table">
+        <thead>
+          <tr>
+            <th>Node</th>
+            <th>Location</th>
+            <th>Alerts</th>
+            <th>Frequency</th>
+          </tr>
+        </thead>
+        <tbody id="alertTable">
+          <tr><td colspan="4" class="loading-text">Loading analytics...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── LIVE NODE CARDS ── -->
+  <div class="section-label">Live Sensor Nodes — MQTT</div>
   <div class="nodes-grid">
 
     <div class="node-card" id="card-NODE_001" data-node="NODE_001">
       <div class="node-head">
         <div><div class="node-id">NODE_001</div><div class="node-loc">📍 West Field</div></div>
-        <div class="node-pill offline" id="pill-NODE_001">
-          <div class="pill-dot offline" id="pilldot-NODE_001"></div>
-          <span id="pilltext-NODE_001">Waiting</span>
-        </div>
+        <div class="node-pill offline" id="pill-NODE_001"><div class="pill-dot offline" id="pilldot-NODE_001"></div><span id="pilltext-NODE_001">Waiting</span></div>
       </div>
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_001">--<span class="unit">°C</span></div>
+        <div class="temp-avg" id="avg-NODE_001">24h avg: --</div>
         <div class="node-updated" id="upd-NODE_001">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_001"></div></div></div>
         <div class="buzzer-row">
@@ -437,13 +375,11 @@
     <div class="node-card" id="card-NODE_002" data-node="NODE_002">
       <div class="node-head">
         <div><div class="node-id">NODE_002</div><div class="node-loc">📍 North Field</div></div>
-        <div class="node-pill offline" id="pill-NODE_002">
-          <div class="pill-dot offline" id="pilldot-NODE_002"></div>
-          <span id="pilltext-NODE_002">Waiting</span>
-        </div>
+        <div class="node-pill offline" id="pill-NODE_002"><div class="pill-dot offline" id="pilldot-NODE_002"></div><span id="pilltext-NODE_002">Waiting</span></div>
       </div>
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_002">--<span class="unit">°C</span></div>
+        <div class="temp-avg" id="avg-NODE_002">24h avg: --</div>
         <div class="node-updated" id="upd-NODE_002">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_002"></div></div></div>
         <div class="buzzer-row">
@@ -456,13 +392,11 @@
     <div class="node-card" id="card-NODE_003" data-node="NODE_003">
       <div class="node-head">
         <div><div class="node-id">NODE_003</div><div class="node-loc">📍 Green Field</div></div>
-        <div class="node-pill offline" id="pill-NODE_003">
-          <div class="pill-dot offline" id="pilldot-NODE_003"></div>
-          <span id="pilltext-NODE_003">Waiting</span>
-        </div>
+        <div class="node-pill offline" id="pill-NODE_003"><div class="pill-dot offline" id="pilldot-NODE_003"></div><span id="pilltext-NODE_003">Waiting</span></div>
       </div>
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_003">--<span class="unit">°C</span></div>
+        <div class="temp-avg" id="avg-NODE_003">24h avg: --</div>
         <div class="node-updated" id="upd-NODE_003">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_003"></div></div></div>
         <div class="buzzer-row">
@@ -475,13 +409,11 @@
     <div class="node-card" id="card-NODE_004" data-node="NODE_004">
       <div class="node-head">
         <div><div class="node-id">NODE_004</div><div class="node-loc">📍 South Field</div></div>
-        <div class="node-pill offline" id="pill-NODE_004">
-          <div class="pill-dot offline" id="pilldot-NODE_004"></div>
-          <span id="pilltext-NODE_004">Waiting</span>
-        </div>
+        <div class="node-pill offline" id="pill-NODE_004"><div class="pill-dot offline" id="pilldot-NODE_004"></div><span id="pilltext-NODE_004">Waiting</span></div>
       </div>
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_004">--<span class="unit">°C</span></div>
+        <div class="temp-avg" id="avg-NODE_004">24h avg: --</div>
         <div class="node-updated" id="upd-NODE_004">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_004"></div></div></div>
         <div class="buzzer-row">
@@ -493,7 +425,7 @@
 
   </div>
 
-  <!-- Buzzer Panel -->
+  <!-- ── BUZZER PANEL ── -->
   <div class="section-label">Buzzer Status</div>
   <div class="buzzer-panel">
     <div class="buzzer-panel-head">
@@ -524,7 +456,7 @@
     </div>
   </div>
 
-  <!-- MQTT Feed Log -->
+  <!-- ── MQTT FEED ── -->
   <div class="section-label">MQTT Live Feed</div>
   <div class="feed-card">
     <div class="feed-header">
@@ -536,60 +468,45 @@
     </div>
   </div>
 
-  <!-- Config -->
+  <!-- ── CONFIG ── -->
   <div class="section-label">Connection Info</div>
   <div class="config-card">
     <div class="config-grid">
-      <div class="config-row">
-        <span class="config-key">Broker</span>
-        <span class="config-val">io.adafruit.com</span>
-      </div>
-      <div class="config-row">
-        <span class="config-key">Protocol</span>
-        <span class="config-val">MQTT over WSS :443</span>
-      </div>
-      <div class="config-row">
-        <span class="config-key">Username</span>
-        <span class="config-val" id="configUser">—</span>
-      </div>
-      <div class="config-row">
-        <span class="config-key">Temp Feeds</span>
-        <span class="config-val">farm-temperature-node001~004</span>
-      </div>
-      <div class="config-row">
-        <span class="config-key">Buzzer Feed</span>
-        <span class="config-val">farm-buzzer (shared)</span>
-      </div>
-      <div class="config-row">
-        <span class="config-key">Threshold</span>
-        <span class="config-val">35.0 °C</span>
-      </div>
+      <div class="config-row"><span class="config-key">Broker</span><span class="config-val">io.adafruit.com</span></div>
+      <div class="config-row"><span class="config-key">Protocol</span><span class="config-val">MQTT over WSS :443</span></div>
+      <div class="config-row"><span class="config-key">Username</span><span class="config-val" id="configUser">—</span></div>
+      <div class="config-row"><span class="config-key">Temp Feeds</span><span class="config-val">farm-temperature-node001~004</span></div>
+      <div class="config-row"><span class="config-key">Buzzer Feed</span><span class="config-val">farm-buzzer (shared)</span></div>
+      <div class="config-row"><span class="config-key">Data Warehouse</span><span class="config-val">Supabase (sensor_logs)</span></div>
     </div>
   </div>
 
 </main>
 
-<footer>
-  CUSTOM SUBSCRIBER · DEPLOYED ON GITHUB PAGES · ADAFRUIT IO MQTT BROKER
-</footer>
+<footer>CUSTOM SUBSCRIBER · GITHUB PAGES · ADAFRUIT IO MQTT · SUPABASE ANALYTICS</footer>
 
 <script>
+  // ── SUPABASE CONFIG ─────────────────────────────────
+  const SUPABASE_URL = 'https://xnkhlsdusjxyfpaaxwbw.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhua2hsc2R1c2p4eWZwYWF4d2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODE4NzcsImV4cCI6MjA5NDE1Nzg3N30.5CF5dUNxbAx_lV0u7jephV-4x82gI-VUJWybih_IqqE';
+  // ────────────────────────────────────────────────────
+
   const BROKER_URL     = 'wss://io.adafruit.com:443/mqtt';
   const TEMP_THRESHOLD = 35.0;
 
-  let mqttClient       = null;
-  let feedItems        = [];
-  let msgCount         = 0;
-  let nodeTimestamps   = {};
+  const NODES = [
+    { id: 'NODE_001', location: 'West Field',  feed: '' },
+    { id: 'NODE_002', location: 'North Field', feed: '' },
+    { id: 'NODE_003', location: 'Green Field', feed: '' },
+    { id: 'NODE_004', location: 'South Field', feed: '' },
+  ];
 
-  // ── Allow Enter key to connect ───────────────────────
-  document.getElementById('inputKey').addEventListener('keydown', e => {
-    if (e.key === 'Enter') startConnection();
-  });
-  document.getElementById('inputUser').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('inputKey').focus();
-  });
+  let mqttClient     = null;
+  let feedItems      = [];
+  let msgCount       = 0;
+  let nodeTimestamps = {};
 
+  // ── Helpers ─────────────────────────────────────────
   function nowStr() {
     return new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
@@ -601,88 +518,28 @@
 
   function updateOnlineCount() {
     const now    = Date.now();
-    const online = ['NODE_001','NODE_002','NODE_003','NODE_004']
-      .filter(id => nodeTimestamps[id] && (now - nodeTimestamps[id]) < 30000).length;
+    const online = NODES.filter(n => nodeTimestamps[n.id] && (now - nodeTimestamps[n.id]) < 30000).length;
     document.getElementById('onlineCount').textContent = `${online} / 4 online`;
   }
 
-  function updateTempUI(nodeId, val) {
-    const num   = parseFloat(val);
-    const isHot = num >= TEMP_THRESHOLD;
+  // ── Login ────────────────────────────────────────────
+  document.getElementById('inputKey').addEventListener('keydown',  e => { if (e.key === 'Enter') startConnection(); });
+  document.getElementById('inputUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inputKey').focus(); });
 
-    const tempEl = document.getElementById(`temp-${nodeId}`);
-    tempEl.innerHTML = `${num.toFixed(1)}<span class="unit">°C</span>`;
-    tempEl.className = 'temp-big' + (isHot ? ' hot' : '');
-
-    const pct  = Math.min(100, Math.max(0, (num / 50) * 100));
-    const fill = document.getElementById(`bar-${nodeId}`);
-    fill.style.width = pct + '%';
-    fill.className   = 'temp-bar-fill' + (num >= 40 ? ' critical' : isHot ? ' hot' : '');
-
-    document.getElementById(`upd-${nodeId}`).textContent      = `updated: ${nowStr()}`;
-    document.getElementById(`pill-${nodeId}`).className       = 'node-pill online';
-    document.getElementById(`pilldot-${nodeId}`).className    = 'pill-dot online';
-    document.getElementById(`pilltext-${nodeId}`).textContent = 'Online';
-    document.getElementById(`card-${nodeId}`).classList.add('active');
-
-    nodeTimestamps[nodeId] = Date.now();
-    updateOnlineCount();
-  }
-
-  function updateBuzzerUI(nodeId, val) {
-    const isOn = val.trim().toUpperCase() === 'ON' || val.trim() === '1';
-
-    const dot   = document.getElementById(`bzdot-${nodeId}`);
-    const state = document.getElementById(`bzstate-${nodeId}`);
-    if (dot)   dot.className       = 'bz-dot' + (isOn ? ' on' : '');
-    if (state) { state.textContent = val.toUpperCase(); state.className = 'buzzer-state-sm' + (isOn ? ' on' : ''); }
-
-    const pdot = document.getElementById(`bzpanel-dot-${nodeId}`);
-    const pval = document.getElementById(`bzpanel-val-${nodeId}`);
-    if (pdot) pdot.className   = 'bz-big-dot' + (isOn ? ' on' : '');
-    if (pval) { pval.textContent = val.toUpperCase(); pval.className = 'bz-val' + (isOn ? ' on' : ''); }
-  }
-
-  function addFeedItem(topic, value) {
-    msgCount++;
-    const isBuzzer = topic.includes('buzzer');
-    feedItems.unshift({ topic, value, time: nowStr(), isBuzzer });
-    if (feedItems.length > 40) feedItems.pop();
-
-    document.getElementById('feedCount').textContent = `${msgCount} messages`;
-    document.getElementById('feedList').innerHTML = feedItems.map(item => `
-      <div class="feed-item">
-        <span class="feed-topic ${item.isBuzzer ? 'buzzer' : ''}">${item.topic}</span>
-        <span class="feed-val">${item.value}</span>
-        <span class="feed-time">${item.time}</span>
-      </div>
-    `).join('');
-  }
-
-  // ── Start connection from login form ─────────────────
   function startConnection() {
     const username = document.getElementById('inputUser').value.trim();
     const key      = document.getElementById('inputKey').value.trim();
     const errEl    = document.getElementById('loginError');
-
-    if (!username || !key) {
-      errEl.style.display = 'block';
-      return;
-    }
+    if (!username || !key) { errEl.style.display = 'block'; return; }
     errEl.style.display = 'none';
     document.getElementById('connectBtn').disabled    = true;
     document.getElementById('connectBtn').textContent = '⏳ Connecting...';
-
     connect(username, key);
   }
 
+  // ── MQTT ─────────────────────────────────────────────
   function connect(AIO_USERNAME, AIO_KEY) {
-    const NODES = [
-      { id: 'NODE_001', feed: `${AIO_USERNAME}/feeds/farm-temperature-node001` },
-      { id: 'NODE_002', feed: `${AIO_USERNAME}/feeds/farm-temperature-node002` },
-      { id: 'NODE_003', feed: `${AIO_USERNAME}/feeds/farm-temperature-node003` },
-      { id: 'NODE_004', feed: `${AIO_USERNAME}/feeds/farm-temperature-node004` },
-    ];
+    NODES.forEach(n => { n.feed = `${AIO_USERNAME}/feeds/farm-temperature-${n.id.toLowerCase().replace('_', '-')}`; });
     const BUZZER_FEED = `${AIO_USERNAME}/feeds/farm-buzzer`;
 
     document.getElementById('configUser').textContent      = AIO_USERNAME;
@@ -691,30 +548,26 @@
     setStatus('', 'Connecting...');
 
     const client = mqtt.connect(BROKER_URL, {
-      username:        AIO_USERNAME,
-      password:        AIO_KEY,
-      clientId:        'custom-sub-' + Math.random().toString(16).substr(2, 8),
+      username: AIO_USERNAME, password: AIO_KEY,
+      clientId: 'custom-sub-' + Math.random().toString(16).substr(2, 8),
       reconnectPeriod: 5000,
     });
 
     mqttClient = client;
 
     client.on('connect', () => {
-      // Hide login screen
       document.getElementById('loginScreen').classList.add('hidden');
       setStatus('connected', `Connected · ${AIO_USERNAME}`);
-
       NODES.forEach(n => client.subscribe(n.feed, { qos: 1 }));
       client.subscribe(BUZZER_FEED, { qos: 1 });
+      loadAnalytics();
     });
 
     client.on('message', (topic, message) => {
-      const val      = message.toString();
+      const val = message.toString();
       addFeedItem(topic, val);
-
       const tempNode = NODES.find(n => n.feed === topic);
       if (tempNode) { updateTempUI(tempNode.id, val); return; }
-
       if (topic === BUZZER_FEED) {
         try {
           const obj = JSON.parse(val);
@@ -724,15 +577,14 @@
       }
     });
 
-    client.on('error', () => {
+    client.on('error',   () => {
       setStatus('error', 'Connection Error');
       document.getElementById('connectBtn').disabled    = false;
       document.getElementById('connectBtn').textContent = '🔌 Connect to Broker';
-      document.getElementById('loginError').style.display = 'block';
       document.getElementById('loginError').textContent   = '⚠ Connection failed. Check your credentials.';
+      document.getElementById('loginError').style.display = 'block';
       document.getElementById('loginScreen').classList.remove('hidden');
     });
-
     client.on('offline', () => setStatus('', 'Reconnecting...'));
     client.on('close',   () => setStatus('', 'Disconnected'));
   }
@@ -746,6 +598,184 @@
     setStatus('', 'Disconnected');
   }
 
+  // ── Temperature UI ───────────────────────────────────
+  function updateTempUI(nodeId, val) {
+    const num   = parseFloat(val);
+    const isHot = num >= TEMP_THRESHOLD;
+    const tempEl = document.getElementById(`temp-${nodeId}`);
+    tempEl.innerHTML = `${num.toFixed(1)}<span class="unit">°C</span>`;
+    tempEl.className = 'temp-big' + (isHot ? ' hot' : '');
+    const pct  = Math.min(100, Math.max(0, (num / 50) * 100));
+    const fill = document.getElementById(`bar-${nodeId}`);
+    fill.style.width = pct + '%';
+    fill.className   = 'temp-bar-fill' + (num >= 40 ? ' critical' : isHot ? ' hot' : '');
+    document.getElementById(`upd-${nodeId}`).textContent      = `updated: ${nowStr()}`;
+    document.getElementById(`pill-${nodeId}`).className       = 'node-pill online';
+    document.getElementById(`pilldot-${nodeId}`).className    = 'pill-dot online';
+    document.getElementById(`pilltext-${nodeId}`).textContent = 'Online';
+    document.getElementById(`card-${nodeId}`).classList.add('active');
+    nodeTimestamps[nodeId] = Date.now();
+    updateOnlineCount();
+  }
+
+  // ── Buzzer UI ────────────────────────────────────────
+  function updateBuzzerUI(nodeId, val) {
+    const isOn  = val.trim().toUpperCase() === 'ON' || val.trim() === '1';
+    const dot   = document.getElementById(`bzdot-${nodeId}`);
+    const state = document.getElementById(`bzstate-${nodeId}`);
+    if (dot)   dot.className       = 'bz-dot' + (isOn ? ' on' : '');
+    if (state) { state.textContent = val.toUpperCase(); state.className = 'buzzer-state-sm' + (isOn ? ' on' : ''); }
+    const pdot = document.getElementById(`bzpanel-dot-${nodeId}`);
+    const pval = document.getElementById(`bzpanel-val-${nodeId}`);
+    if (pdot) pdot.className   = 'bz-big-dot' + (isOn ? ' on' : '');
+    if (pval) { pval.textContent = val.toUpperCase(); pval.className = 'bz-val' + (isOn ? ' on' : ''); }
+  }
+
+  // ── Feed Log ─────────────────────────────────────────
+  function addFeedItem(topic, value) {
+    msgCount++;
+    const isBuzzer = topic.includes('buzzer');
+    feedItems.unshift({ topic, value, time: nowStr(), isBuzzer });
+    if (feedItems.length > 40) feedItems.pop();
+    document.getElementById('feedCount').textContent = `${msgCount} messages`;
+    document.getElementById('feedList').innerHTML = feedItems.map(item => `
+      <div class="feed-item">
+        <span class="feed-topic ${item.isBuzzer ? 'buzzer' : ''}">${item.topic}</span>
+        <span class="feed-val">${item.value}</span>
+        <span class="feed-time">${item.time}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── SUPABASE Analytics ───────────────────────────────
+  async function supabaseFetch(endpoint) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return res.json();
+  }
+
+  async function loadAnalytics() {
+    try {
+      // 1. Total readings
+      const totalRes = await fetch(`${SUPABASE_URL}/rest/v1/sensor_logs?select=id`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'count=exact' }
+      });
+      const totalCount = totalRes.headers.get('content-range');
+      if (totalCount) {
+        const count = totalCount.split('/')[1];
+        document.getElementById('an-total').textContent = parseInt(count).toLocaleString();
+      }
+
+      // 2. Total buzzer alerts (ON events)
+      const alertRes = await fetch(`${SUPABASE_URL}/rest/v1/buzzer_logs?select=id&state=eq.ON`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'count=exact' }
+      });
+      const alertCount = alertRes.headers.get('content-range');
+      if (alertCount) {
+        document.getElementById('an-alerts').textContent = alertCount.split('/')[1];
+      }
+
+      // 3. Per-node 24h averages
+      const since24h = new Date(Date.now() - 86400000).toISOString();
+      const logsRes  = await supabaseFetch(`sensor_logs?select=node_id,temperature&created_at=gte.${since24h}&order=created_at.desc`);
+
+      // 4. Yesterday averages for trend
+      const since48h   = new Date(Date.now() - 172800000).toISOString();
+      const yesterdayRes = await supabaseFetch(`sensor_logs?select=node_id,temperature&created_at=gte.${since48h}&created_at=lt.${since24h}`);
+
+      // Compute per-node averages
+      const nodeAvgs      = {};
+      const nodeAvgsYest  = {};
+      const nodeCounts    = {};
+
+      NODES.forEach(n => { nodeAvgs[n.id] = []; nodeAvgsYest[n.id] = []; nodeCounts[n.id] = 0; });
+
+      logsRes.forEach(row => {
+        if (nodeAvgs[row.node_id]) nodeAvgs[row.node_id].push(row.temperature);
+      });
+      yesterdayRes.forEach(row => {
+        if (nodeAvgsYest[row.node_id]) nodeAvgsYest[row.node_id].push(row.temperature);
+      });
+
+      const avgByNode = NODES.map(n => {
+        const vals      = nodeAvgs[n.id];
+        const valsYest  = nodeAvgsYest[n.id];
+        const avg       = vals.length      ? vals.reduce((a,b) => a+b,0) / vals.length           : null;
+        const avgYest   = valsYest.length  ? valsYest.reduce((a,b) => a+b,0) / valsYest.length   : null;
+        const trend     = avg && avgYest ? avg - avgYest : null;
+        return { ...n, avg, avgYest, trend, count: vals.length };
+      });
+
+      // Update node card 24h avg
+      avgByNode.forEach(n => {
+        const el = document.getElementById(`avg-${n.id}`);
+        if (el) el.textContent = n.avg ? `24h avg: ${n.avg.toFixed(1)}°C` : '24h avg: no data';
+      });
+
+      // Network average
+      const allAvgs = avgByNode.filter(n => n.avg !== null).map(n => n.avg);
+      if (allAvgs.length) {
+        const networkAvg = allAvgs.reduce((a,b) => a+b,0) / allAvgs.length;
+        document.getElementById('an-avg').textContent = networkAvg.toFixed(1) + '°C';
+      }
+
+      // Hottest node
+      const hottest = avgByNode.filter(n => n.avg !== null).sort((a,b) => b.avg - a.avg)[0];
+      if (hottest) {
+        document.getElementById('an-hottest').textContent     = hottest.id;
+        document.getElementById('an-hottest-sub').textContent = `${hottest.location} · ${hottest.avg.toFixed(1)}°C avg`;
+      }
+
+      // Rankings table
+      const sorted = [...avgByNode].filter(n => n.avg !== null).sort((a,b) => b.avg - a.avg);
+      document.getElementById('rankingTable').innerHTML = sorted.length ? sorted.map((n, i) => {
+        const trendVal = n.trend;
+        const trendStr = trendVal === null ? '—' : trendVal > 0.5 ? `▲ +${trendVal.toFixed(1)}°C` : trendVal < -0.5 ? `▼ ${trendVal.toFixed(1)}°C` : '● stable';
+        const trendClass = trendVal === null ? 'trend-flat' : trendVal > 0.5 ? 'trend-up' : trendVal < -0.5 ? 'trend-down' : 'trend-flat';
+        return `<tr>
+          <td><span class="rank-badge rank-${i+1}">${i+1}</span></td>
+          <td>${n.id}</td>
+          <td>${n.location}</td>
+          <td style="color:var(--amber);font-weight:700">${n.avg.toFixed(1)}°C</td>
+          <td class="${trendClass}">${trendStr}</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="5" class="loading-text">No data yet — waiting for readings</td></tr>';
+
+      // Buzzer alert table
+      const buzzerRes = await supabaseFetch(`buzzer_logs?select=node_id&state=eq.ON`);
+      const alertCounts = {};
+      NODES.forEach(n => alertCounts[n.id] = 0);
+      buzzerRes.forEach(row => { if (alertCounts[row.node_id] !== undefined) alertCounts[row.node_id]++; });
+      const maxAlerts = Math.max(...Object.values(alertCounts), 1);
+
+      document.getElementById('alertTable').innerHTML = NODES.map(n => {
+        const count = alertCounts[n.id] || 0;
+        const pct   = (count / maxAlerts) * 100;
+        return `<tr>
+          <td>${n.id}</td>
+          <td>${n.location}</td>
+          <td style="color:var(--amber);font-weight:700">${count}</td>
+          <td>
+            <div class="alert-bar-wrap">
+              <div class="alert-bar"><div class="alert-bar-fill" style="width:${pct}%"></div></div>
+              <span style="font-size:9px;color:var(--muted)">${count}</span>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+
+    } catch(e) {
+      console.error('Analytics error:', e);
+    }
+  }
+
+  // Refresh analytics every 2 minutes
+  setInterval(() => { if (mqttClient && mqttClient.connected) loadAnalytics(); }, 120000);
   setInterval(updateOnlineCount, 15000);
 </script>
 </body>
