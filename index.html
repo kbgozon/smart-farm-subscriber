@@ -279,7 +279,7 @@
   <div class="page-heading">Farm <span>Network</span> Monitor</div>
 
   <!-- ── ANALYTICS SUMMARY ── -->
-  <div class="section-label">Analytics — Supabase Data Warehouse</div>
+  <div class="section-label">Analytics — Supabase Data Warehouse <button onclick="loadAnalytics()" style="margin-left:12px;font-family:var(--mono);font-size:9px;padding:3px 10px;background:var(--bg-panel);border:1px solid var(--green-dim);color:var(--green);border-radius:4px;cursor:pointer;letter-spacing:1px;" id="refreshBtn">↻ REFRESH</button> <span id="an-lastupdate" style="font-family:var(--mono);font-size:9px;color:var(--muted);"></span></div>
   <div class="analytics-row">
     <div class="analytics-card green">
       <div class="an-label">Total Readings Logged</div>
@@ -518,7 +518,7 @@
 
   function updateOnlineCount() {
     const now    = Date.now();
-    const online = NODES.filter(n => nodeTimestamps[n.id] && (now - nodeTimestamps[n.id]) < 30000).length;
+    const online = NODES.filter(n => nodeTimestamps[n.id] && (now - nodeTimestamps[n.id]) < 3900000).length;
     document.getElementById('onlineCount').textContent = `${online} / 4 online`;
   }
 
@@ -659,7 +659,7 @@
     return res.json();
   }
 
-  async function loadAnalytics() {
+  async function _loadAnalytics() {
     try {
       // 1. Total readings
       const totalRes = await fetch(`${SUPABASE_URL}/rest/v1/sensor_logs?select=id`, {
@@ -695,11 +695,24 @@
 
       NODES.forEach(n => { nodeAvgs[n.id] = []; nodeAvgsYest[n.id] = []; nodeCounts[n.id] = 0; });
 
+      // Normalize node_id: "farm-temperature-node001" → "NODE_001", already "NODE_001" stays
+      function normalizeNodeId(raw) {
+        if (!raw) return raw;
+        const upper = raw.toUpperCase();
+        if (upper.startsWith('NODE_')) return upper; // already correct
+        // "farm-temperature-node001" → extract "node001" → "NODE_001"
+        const m = raw.match(/node[_-]?0*(\d+)/i);
+        if (m) return 'NODE_' + m[1].padStart(3, '0');
+        return raw;
+      }
+
       logsRes.forEach(row => {
-        if (nodeAvgs[row.node_id]) nodeAvgs[row.node_id].push(row.temperature);
+        const nid = normalizeNodeId(row.node_id);
+        if (nodeAvgs[nid]) nodeAvgs[nid].push(row.temperature);
       });
       yesterdayRes.forEach(row => {
-        if (nodeAvgsYest[row.node_id]) nodeAvgsYest[row.node_id].push(row.temperature);
+        const nid = normalizeNodeId(row.node_id);
+        if (nodeAvgsYest[nid]) nodeAvgsYest[nid].push(row.temperature);
       });
 
       const avgByNode = NODES.map(n => {
@@ -714,7 +727,7 @@
       // Update node card 24h avg
       avgByNode.forEach(n => {
         const el = document.getElementById(`avg-${n.id}`);
-        if (el) el.textContent = n.avg ? `24h avg: ${n.avg.toFixed(1)}°C` : '24h avg: no data';
+        if (el) el.textContent = n.avg !== null ? `24h avg: ${n.avg.toFixed(1)}°C` : '24h avg: no data';
       });
 
       // Network average
@@ -750,7 +763,10 @@
       const buzzerRes = await supabaseFetch(`buzzer_logs?select=node_id&state=eq.ON`);
       const alertCounts = {};
       NODES.forEach(n => alertCounts[n.id] = 0);
-      buzzerRes.forEach(row => { if (alertCounts[row.node_id] !== undefined) alertCounts[row.node_id]++; });
+      buzzerRes.forEach(row => {
+        const nid = normalizeNodeId(row.node_id);
+        if (alertCounts[nid] !== undefined) alertCounts[nid]++;
+      });
       const maxAlerts = Math.max(...Object.values(alertCounts), 1);
 
       document.getElementById('alertTable').innerHTML = NODES.map(n => {
@@ -771,11 +787,22 @@
 
     } catch(e) {
       console.error('Analytics error:', e);
+      const upd = document.getElementById('an-lastupdate');
+      if (upd) upd.textContent = `⚠ fetch error — check console`;
     }
   }
 
-  // Refresh analytics every 2 minutes
-  setInterval(() => { if (mqttClient && mqttClient.connected) loadAnalytics(); }, 120000);
+  async function loadAnalytics() {
+    const btn = document.getElementById('refreshBtn');
+    if (btn) btn.textContent = '⏳ Loading...';
+    await _loadAnalytics();
+    const upd = document.getElementById('an-lastupdate');
+    if (upd) upd.textContent = `updated ${nowStr()}`;
+    if (btn) btn.textContent = '↻ REFRESH';
+  }
+
+  // Refresh analytics every 60 seconds — safe for Supabase free tier (~86K calls/month at ~1-2KB each)
+  setInterval(() => { loadAnalytics(); }, 60000);
   setInterval(updateOnlineCount, 15000);
 </script>
 </body>
