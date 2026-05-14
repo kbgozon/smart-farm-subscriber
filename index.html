@@ -845,6 +845,9 @@
         const nid = normalizeNodeId(row.node_id);
         if (alertCounts[nid] !== undefined) alertCounts[nid]++;
       });
+      // Demo data
+      alertCounts['NODE_001'] = (alertCounts['NODE_001'] || 0) + 1;
+      alertCounts['NODE_002'] = (alertCounts['NODE_002'] || 0) + 1;
       const maxAlerts = Math.max(...Object.values(alertCounts), 1);
 
       document.getElementById('alertTable').innerHTML = NODES.map(n => {
