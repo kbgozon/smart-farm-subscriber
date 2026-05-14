@@ -600,7 +600,7 @@
 
   // ── MQTT ─────────────────────────────────────────────
   function connect(AIO_USERNAME, AIO_KEY) {
-    NODES.forEach(n => { n.feed = `${AIO_USERNAME}/feeds/farm-temperature-${n.id.toLowerCase().replace('_', '-')}`; });
+    NODES.forEach(n => { n.feed = `${AIO_USERNAME}/feeds/farm-temperature-${n.id.toLowerCase().replace('node_', 'node')}`; });
     const BUZZER_FEED = `${AIO_USERNAME}/feeds/farm-buzzer`;
 
     document.getElementById('configUser').textContent      = AIO_USERNAME;
