@@ -151,6 +151,10 @@
     .node-pill { font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
     .node-pill.online  { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid var(--green-dim); }
     .node-pill.offline { background: var(--bg-panel); color: var(--muted); border: 1px solid var(--border); }
+    .node-pill.sleeping { background: rgba(251,191,36,0.1); color: var(--amber); border: 1px solid var(--amber); }
+    .pill-dot.sleeping  { background: var(--amber); animation: pulse 2s infinite; }
+    .node-card.sleeping { border-color: var(--amber) !important; opacity: 0.8; }
+    .sleep-icon         { font-size: 10px; color: var(--amber); margin-top: 4px; font-family: var(--mono); letter-spacing: 0.5px; }
     .pill-dot { width: 5px; height: 5px; border-radius: 50%; }
     .pill-dot.online  { background: var(--green); animation: pulse 1.5s infinite; }
     .pill-dot.offline { background: var(--muted); }
@@ -319,11 +323,12 @@
             <th>Node</th>
             <th>Location</th>
             <th>Avg Temp</th>
+            <th>Peak</th>
             <th>Trend</th>
           </tr>
         </thead>
         <tbody id="rankingTable">
-          <tr><td colspan="5" class="loading-text">Loading analytics...</td></tr>
+          <tr><td colspan="6" class="loading-text">Loading analytics...</td></tr>
         </tbody>
       </table>
     </div>
@@ -363,6 +368,7 @@
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_001">--<span class="unit">°C</span></div>
         <div class="temp-avg" id="avg-NODE_001">24h avg: --</div>
+        <div class="sleep-icon" id="sleep-NODE_001" style="display:none">💤 SLEEPING — wakes in <span id="wake-NODE_001">~60m</span></div>
         <div class="node-updated" id="upd-NODE_001">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_001"></div></div></div>
         <div class="buzzer-row">
@@ -380,6 +386,7 @@
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_002">--<span class="unit">°C</span></div>
         <div class="temp-avg" id="avg-NODE_002">24h avg: --</div>
+        <div class="sleep-icon" id="sleep-NODE_002" style="display:none">💤 SLEEPING — wakes in <span id="wake-NODE_002">~60m</span></div>
         <div class="node-updated" id="upd-NODE_002">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_002"></div></div></div>
         <div class="buzzer-row">
@@ -397,6 +404,7 @@
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_003">--<span class="unit">°C</span></div>
         <div class="temp-avg" id="avg-NODE_003">24h avg: --</div>
+        <div class="sleep-icon" id="sleep-NODE_003" style="display:none">💤 SLEEPING — wakes in <span id="wake-NODE_003">~60m</span></div>
         <div class="node-updated" id="upd-NODE_003">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_003"></div></div></div>
         <div class="buzzer-row">
@@ -414,6 +422,7 @@
       <div class="node-body">
         <div class="temp-big waiting" id="temp-NODE_004">--<span class="unit">°C</span></div>
         <div class="temp-avg" id="avg-NODE_004">24h avg: --</div>
+        <div class="sleep-icon" id="sleep-NODE_004" style="display:none">💤 SLEEPING — wakes in <span id="wake-NODE_004">~60m</span></div>
         <div class="node-updated" id="upd-NODE_004">no data yet</div>
         <div class="temp-bar-wrap"><div class="temp-bar"><div class="temp-bar-fill" id="bar-NODE_004"></div></div></div>
         <div class="buzzer-row">
@@ -518,8 +527,60 @@
 
   function updateOnlineCount() {
     const now    = Date.now();
-    const online = NODES.filter(n => nodeTimestamps[n.id] && (now - nodeTimestamps[n.id]) < 3900000).length;
-    document.getElementById('onlineCount').textContent = `${online} / 4 online`;
+    let onlineCount = 0;
+
+    NODES.forEach(n => {
+      const last    = nodeTimestamps[n.id];
+      const elapsed = last ? (now - last) : null;
+      const pill    = document.getElementById(`pill-${n.id}`);
+      const pillDot = document.getElementById(`pilldot-${n.id}`);
+      const pillTxt = document.getElementById(`pilltext-${n.id}`);
+      const card    = document.getElementById(`card-${n.id}`);
+      const tempEl  = document.getElementById(`temp-${n.id}`);
+      const sleepEl = document.getElementById(`sleep-${n.id}`);
+      const wakeEl  = document.getElementById(`wake-${n.id}`);
+
+      if (!last) return; // never seen — stays Waiting
+
+      const ONLINE_WINDOW  = 90000;        // 90 sec — actively publishing
+      const SLEEP_WINDOW   = 3900000;      // 65 min — sleeping but known alive
+      const SLEEP_INTERVAL = 3600000;      // 1 hour sleep cycle
+
+      if (elapsed < ONLINE_WINDOW) {
+        // ── ONLINE ───────────────────────────────────────
+        onlineCount++;
+        pill.className    = 'node-pill online';
+        pillDot.className = 'pill-dot online';
+        pillTxt.textContent = 'Online';
+        card.classList.remove('sleeping');
+        if (tempEl) tempEl.classList.remove('sleeping');
+        if (sleepEl) sleepEl.style.display = 'none';
+
+      } else if (elapsed < SLEEP_WINDOW) {
+        // ── SLEEPING ─────────────────────────────────────
+        pill.className    = 'node-pill sleeping';
+        pillDot.className = 'pill-dot sleeping';
+        pillTxt.textContent = 'Sleeping';
+        card.classList.add('sleeping');
+        if (tempEl) tempEl.classList.add('sleeping');
+        if (sleepEl) sleepEl.style.display = 'block';
+        // Show time until next wake
+        if (wakeEl) {
+          const minsLeft = Math.max(0, Math.ceil((SLEEP_INTERVAL - elapsed) / 60000));
+          wakeEl.textContent = minsLeft > 0 ? `~${minsLeft}m` : 'soon';
+        }
+      } else {
+        // ── OFFLINE (missed wake cycle) ───────────────────
+        pill.className    = 'node-pill offline';
+        pillDot.className = 'pill-dot offline';
+        pillTxt.textContent = 'Offline';
+        card.classList.remove('sleeping');
+        if (tempEl) tempEl.classList.remove('sleeping');
+        if (sleepEl) sleepEl.style.display = 'none';
+      }
+    });
+
+    document.getElementById('onlineCount').textContent = `${onlineCount} / 4 online`;
   }
 
   // ── Login ────────────────────────────────────────────
@@ -710,6 +771,16 @@
         const nid = normalizeNodeId(row.node_id);
         if (nodeAvgs[nid]) nodeAvgs[nid].push(row.temperature);
       });
+
+      // Track peak per node
+      const nodePeaks = {};
+      NODES.forEach(n => nodePeaks[n.id] = null);
+      logsRes.forEach(row => {
+        const nid = normalizeNodeId(row.node_id);
+        if (nodePeaks[nid] !== undefined) {
+          if (nodePeaks[nid] === null || row.temperature > nodePeaks[nid]) nodePeaks[nid] = row.temperature;
+        }
+      });
       yesterdayRes.forEach(row => {
         const nid = normalizeNodeId(row.node_id);
         if (nodeAvgsYest[nid]) nodeAvgsYest[nid].push(row.temperature);
@@ -721,7 +792,7 @@
         const avg       = vals.length      ? vals.reduce((a,b) => a+b,0) / vals.length           : null;
         const avgYest   = valsYest.length  ? valsYest.reduce((a,b) => a+b,0) / valsYest.length   : null;
         const trend     = avg && avgYest ? avg - avgYest : null;
-        return { ...n, avg, avgYest, trend, count: vals.length };
+        return { ...n, avg, avgYest, trend, count: vals.length, peak: nodePeaks[n.id] };
       });
 
       // Update node card 24h avg
@@ -755,6 +826,7 @@
           <td>${n.id}</td>
           <td>${n.location}</td>
           <td style="color:var(--amber);font-weight:700">${n.avg.toFixed(1)}°C</td>
+          <td style="color:var(--red);font-weight:700">${n.peak !== null ? n.peak.toFixed(1) + '°C' : '—'}</td>
           <td class="${trendClass}">${trendStr}</td>
         </tr>`;
       }).join('') : '<tr><td colspan="5" class="loading-text">No data yet — waiting for readings</td></tr>';
