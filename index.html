@@ -542,9 +542,9 @@
 
       if (!last) return; // never seen — stays Waiting
 
-      const ONLINE_WINDOW  = 90000;        // 90 sec — actively publishing
-      const SLEEP_WINDOW   = 150000;       // 2.5 min — if no wake after this → Offline
-      const SLEEP_INTERVAL = 120000;       // 2 min sleep cycle (matches Arduino)
+      const ONLINE_WINDOW  = 3000;         // 3 sec — just enough to register publish
+      const SLEEP_INTERVAL = 30000;        // 30 sec sleep cycle (matches Arduino)
+      const SLEEP_WINDOW   = 45000;        // 45 sec — missed wake → Offline
 
       if (elapsed < ONLINE_WINDOW) {
         // ── ONLINE ───────────────────────────────────────
