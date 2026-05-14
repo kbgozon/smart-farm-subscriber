@@ -543,8 +543,8 @@
       if (!last) return; // never seen — stays Waiting
 
       const ONLINE_WINDOW  = 90000;        // 90 sec — actively publishing
-      const SLEEP_WINDOW   = 3900000;      // 65 min — sleeping but known alive
-      const SLEEP_INTERVAL = 3600000;      // 1 hour sleep cycle
+      const SLEEP_WINDOW   = 150000;       // 2.5 min — if no wake after this → Offline
+      const SLEEP_INTERVAL = 120000;       // 2 min sleep cycle (matches Arduino)
 
       if (elapsed < ONLINE_WINDOW) {
         // ── ONLINE ───────────────────────────────────────
@@ -566,8 +566,14 @@
         if (sleepEl) sleepEl.style.display = 'block';
         // Show time until next wake
         if (wakeEl) {
-          const minsLeft = Math.max(0, Math.ceil((SLEEP_INTERVAL - elapsed) / 60000));
-          wakeEl.textContent = minsLeft > 0 ? `~${minsLeft}m` : 'soon';
+          const secsLeft = Math.max(0, Math.ceil((SLEEP_INTERVAL - elapsed) / 1000));
+          if (secsLeft >= 60) {
+            wakeEl.textContent = `~${Math.ceil(secsLeft/60)}m`;
+          } else if (secsLeft > 0) {
+            wakeEl.textContent = `~${secsLeft}s`;
+          } else {
+            wakeEl.textContent = 'any moment...';
+          }
         }
       } else {
         // ── OFFLINE (missed wake cycle) ───────────────────
